@@ -1,3 +1,11 @@
+/** Representa direções */
 public enum Direction {
-    UP, DOWN, LEFT, RIGHT
+    /** Cima */
+    UP,
+    /** Baixo */
+    DOWN,
+    /** Esquerda */
+    LEFT,
+    /** Direita */
+    RIGHT
 }

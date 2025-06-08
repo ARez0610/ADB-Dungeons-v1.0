@@ -5,10 +5,23 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 
+/** 
+ * Classe da Tela de Vitória do jogo
+ * 
+ * @author Arthur dos Santos Rezende
+ * @version 1.0
+*/
 public class TelaVitoria extends TelaBase{
+    /** Botão para voltar para a tela inicial */
     private JButton returnButton = new JButton("Voltar ao menu");
+    /** Imagem de fundo */
     private Image backgroundImage;
 
+    /**
+     * Construtor da tela secreta
+     * 
+     * @param musica Player de música compartilhado entre telas
+     */
     TelaVitoria(MusicPlayer musica){
         super(musica);
         saveData();
@@ -25,6 +38,9 @@ public class TelaVitoria extends TelaBase{
         start();
     }
 
+    /**
+     * Configura o botão de retorno. Ao ser apertado, carrega a tela inicial
+     */
     public void returnButton(){
         returnButton.setPreferredSize(new Dimension(250, 80));
         returnButton.setFont(new Font(NOME_FONTE, Font.BOLD, 30));
@@ -50,6 +66,9 @@ public class TelaVitoria extends TelaBase{
         });
     }
 
+    /**
+     * Carrega a imagem de fundo.
+     */
     public void carregarImagens(){
         try {
             backgroundImage = ImageIO.read(new File("assets/backgroundVictory.png"));
@@ -59,6 +78,11 @@ public class TelaVitoria extends TelaBase{
         }
     }
 
+    /**
+     * Renderiza os elementos visuais da tela de vitória.
+     * 
+     * @param g Contexto gráfico para renderização
+     */
     @Override
     public void desenharTela(Graphics g) {
         if(estado != EstadoJogo.PARADO){
@@ -82,6 +106,9 @@ public class TelaVitoria extends TelaBase{
         }
     }
 
+    /**
+     * Realiza limpeza de recursos antes da tela ser descartada.
+     */
     public void cleanUp() {
         // Parar o timer
         if (timer != null && timer.isRunning()) {

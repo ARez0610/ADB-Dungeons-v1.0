@@ -15,15 +15,33 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
+/** 
+ * Classe da Tela Inicial do jogo
+ * 
+ * @author Arthur dos Santos Rezende
+ * @version 1.0
+*/
 public class TelaInicio extends TelaBase{
+    /** Botão para iniciar o jogo */
     private JButton startButton = new JButton("Começar");
+    /** Botão para exibir as instruções do jogo */
     private JButton instrucoesButton = new JButton("Instruções");
-    private Image backgroundImg;
-    private Image logoImg;
+
+    /** Imagens */
+    private Image backgroundImg, logoImg;
+
+    /** Indica se o jogador derrotou o boss secreto */
     private boolean wasCappuccinoDefeated;
+    /** Campo de texto onde o jogador poderá digitar o código secreto */
     private JTextField secreteTextField = new JTextField(30);
+    /** Código secreto necessário para acessar a sala secreta */
     private final String SECRET_CODE = "cappuccino";
 
+    /**
+     * Construtor da tela inicial
+     * 
+     * @param musica Player de música compartilhado entre telas
+     */
     TelaInicio(MusicPlayer musica){
         super(musica);
         // Quando a vinheta terminar, toca a música de fundo
@@ -60,6 +78,9 @@ public class TelaInicio extends TelaBase{
         start();
     }
 
+    /**
+     * Configura o botão de início. Ao ser apertado, carrega a tela de jogo
+     */
     public void startButton(){
         startButton.setPreferredSize(new Dimension(200, 80));
         startButton.setFont(new Font(NOME_FONTE, Font.BOLD, 30));
@@ -128,6 +149,10 @@ public class TelaInicio extends TelaBase{
             }
         });
     }
+
+    /**
+     * Configura o botão de intruções. Ao ser apertado, mostra os controles e o objetivo do jogo
+     */
     public void instrucoesButton(){
         instrucoesButton.setPreferredSize(new Dimension(200, 80));
         instrucoesButton.setFont(new Font(NOME_FONTE, Font.BOLD, 30));
@@ -137,6 +162,10 @@ public class TelaInicio extends TelaBase{
         instrucoesButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
         instrucoesButton.addActionListener(e -> mostrarInstrucoes());
     }
+
+    /**
+     * Exibe as instruções do jogo em uma caixa de diálogo.
+     */
     private void mostrarInstrucoes() {
         String mensagem = "CONTROLES DO JOGO:\n\n" +
                          "• Teclas direcionais para mover\n" +
@@ -153,6 +182,9 @@ public class TelaInicio extends TelaBase{
         );
     }
 
+    /**
+     * Configura o campo de texto do código secreto. Caso o jogador digitar o código corretamente, dispara o evento de acesso à sala secreta.
+     */
     public void secreteTextField(){
         secreteTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -174,6 +206,12 @@ public class TelaInicio extends TelaBase{
         });
     }
 
+    /**
+     * Dispara o evento de acesso à sala secreta quando o código secreto é inserido corretamente.
+     * <p>
+     * Verifica se o boss secreto já foi derrotado. Se não, carrega a batalha contra o boss secreto.
+     * </p>
+     */
     private void triggerEvent() {
         JOptionPane.showMessageDialog(null, "Comando reconhecido! Entrando na sala secreta.");
         try {
@@ -186,6 +224,11 @@ public class TelaInicio extends TelaBase{
         
     }
 
+    /**
+     * Carrega a tela de batalha contra um boss.
+     * 
+     * @param bossNum Número identificador do boss (0 para o boss secreto)
+     */
     public void loadBoss(int bossNum){
         musica.stopSong();
         efeito.stopSong();
@@ -205,6 +248,7 @@ public class TelaInicio extends TelaBase{
         }
     }
 
+    /** Carrega a tela da sala secreta */
     private void acessSecretRoom(){
         musica.stopSong();
         efeito.stopSong();
@@ -220,6 +264,14 @@ public class TelaInicio extends TelaBase{
         telaSecreta.requestFocusInWindow();
     }
 
+    /**
+     * Lê o arquivo de save do boss secreto para determinar se ele já foi derrotado.
+     * <p>
+     * Se o arquivo não existir, cria um novo com o valor padrão (0).
+     * </p>
+     * 
+     * @throws IOException Se ocorrer um erro de I/O durante a leitura do arquivo
+     */
     public void readSaveData() throws IOException {
         Scanner s = null;
         try {
@@ -269,6 +321,13 @@ public class TelaInicio extends TelaBase{
             }
         }
     }
+
+    /** 
+     * Cria um novo arquivo de save para o boss secreto com o valor padrão (0).
+     * 
+     * @param saveFile Arquivo a ser criado
+     * @throws IOException Se ocorrer um erro de I/O durante a criação do arquivo
+     */
     private void newSave(File saveFile) throws IOException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(saveFile))) {
             writer.println("0");
@@ -276,6 +335,9 @@ public class TelaInicio extends TelaBase{
         }
     }
 
+    /**
+     * Carrega as imagens necessárias para a tela inicial.
+     */
     public void carregarImagens(){
         try {
             backgroundImg = ImageIO.read(new File("assets/background.png"));
@@ -286,6 +348,11 @@ public class TelaInicio extends TelaBase{
         }
     }
 
+    /**
+     * Renderiza os elementos visuais da tela inicial.
+     * 
+     * @param g Contexto gráfico para renderização.
+     */
     @Override
     public void desenharTela(Graphics g) {
         if(estado != EstadoJogo.PARADO){
@@ -311,6 +378,9 @@ public class TelaInicio extends TelaBase{
         }
     }
 
+    /**
+     * Realiza limpeza de recursos antes da tela ser descartada.
+     */
     public void cleanUp() {
         // Parar o timer
         if (timer != null && timer.isRunning()) {

@@ -6,12 +6,29 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
+/** 
+ * Classe da Tela de Game Over do jogo
+ * 
+ * @author Arthur dos Santos Rezende
+ * @version 1.0
+*/
 public class TelaGameOver extends TelaBase{
+    /** Botão para voltar para o jogo */
     private JButton continueButton = new JButton("Continuar");
+    /** Botão para voltar para a tela inicial */
     private JButton returnButton = new JButton("Voltar ao menu");
+
+    /** Imagem de Game Over */
     private Image fritoImg;
+
+    /** Valor gerado aleatoreamente ao carregar a tela. Caso seja 0, a dica de como entrar na sala secreta será carregada */
     private int showTip;
 
+    /**
+     * Construtor da tela de Game Over
+     * 
+     * @param musica Player de música compartilhado entre telas
+     */
     TelaGameOver(MusicPlayer musica){
         super(musica);
         musica.playSong("assets/vcPerdeu.wav", false);
@@ -28,11 +45,15 @@ public class TelaGameOver extends TelaBase{
         gbc.gridy = 1;
         add(returnButton, gbc);
         
-        showTip = new Random().nextInt(10); //10% de chance de mostrar a dica de como entrar na sala secreta.
+        // 10% de chance de mostrar a dica de como entrar na sala secreta.
+        showTip = new Random().nextInt(10);
 
         start();
     }
 
+    /**
+     * Configura o botão de continuar. Ao ser apertado, carrega a tela de jogo
+     */
     public void continueButton(){
         continueButton.setPreferredSize(new Dimension(250, 80));
         continueButton.setFont(new Font(NOME_FONTE, Font.BOLD, 30));
@@ -96,6 +117,10 @@ public class TelaGameOver extends TelaBase{
             }
         });
     }
+
+    /**
+     * Configura o botão de retorno. Ao ser apertado, carrega a tela inicial
+     */
     public void returnButton(){
         returnButton.setPreferredSize(new Dimension(250, 80));
         returnButton.setFont(new Font(NOME_FONTE, Font.BOLD, 30));
@@ -121,6 +146,9 @@ public class TelaGameOver extends TelaBase{
         });
     }
 
+    /**
+     * Carrega a imagem de Game Over.
+     */
     public void carregarImagens(){
         try {
             fritoImg = ImageIO.read(new File("assets/Frito.png"));
@@ -130,6 +158,11 @@ public class TelaGameOver extends TelaBase{
         }
     }
 
+    /**
+     * Renderiza os elementos visuais da tela de Game Over.
+     * 
+     * @param g Contexto gráfico para renderização
+     */
     @Override
     public void desenharTela(Graphics g) {
         if(estado != EstadoJogo.PARADO){
@@ -154,6 +187,9 @@ public class TelaGameOver extends TelaBase{
         }
     }
 
+    /**
+     * Realiza limpeza de recursos antes da tela ser descartada.
+     */
     public void cleanUp() {
         // Parar o timer
         if (timer != null && timer.isRunning()) {

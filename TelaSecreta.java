@@ -5,12 +5,26 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 
+/** 
+ * Classe da Tela Secreta do jogo
+ * 
+ * @author Arthur dos Santos Rezende
+ * @version 1.0
+*/
 public class TelaSecreta extends TelaBase{
+    /** Botão para voltar para a tela inicial */
     private JButton returnButton = new JButton("Voltar ao menu");
+    /** Botões para acessar cada um dos cinco mundos */
     private JButton[] worldButtons = new JButton[5];
 
+    /** Imagem de fundo */
     private Image backgroundImg;
 
+    /**
+     * Construtor da tela secreta
+     * 
+     * @param musica Player de música compartilhado entre telas
+     */
     TelaSecreta(MusicPlayer musica){
         super(musica);
         musica.playSong("assets/fog.wav", false);
@@ -32,6 +46,9 @@ public class TelaSecreta extends TelaBase{
         start();
     }
 
+    /**
+     * Configura os botões de mundo. Ao ser apertado, carrega o seu respectivo mundo
+     */
     public void worldButtons(){
         for(int i = 0; i < 5; i++){
             final int s = i + 1;
@@ -51,6 +68,12 @@ public class TelaSecreta extends TelaBase{
             });
         }
     }
+
+    /**
+     * Salva o jogo e carrega a tela de jogo
+     * 
+     * @param s O mundo a ser carregado
+     */
     public void loadGame(int s){
         save = s;
         saveData();
@@ -105,6 +128,9 @@ public class TelaSecreta extends TelaBase{
         }
     }
 
+    /**
+     * Configura o botão de retorno. Ao ser apertado, carrega a tela inicial
+     */
     public void returnButton(){
         returnButton.setPreferredSize(new Dimension(250, 80));
         returnButton.setFont(new Font(NOME_FONTE, Font.BOLD, 30));
@@ -130,6 +156,9 @@ public class TelaSecreta extends TelaBase{
         });
     }
 
+    /**
+     * Carrega a imagem de fundo.
+     */
     public void carregarImagens(){
         try {
             backgroundImg = ImageIO.read(new File("assets/secretBackground.png"));
@@ -139,6 +168,11 @@ public class TelaSecreta extends TelaBase{
         }
     }
 
+    /**
+     * Renderiza os elementos visuais da tela secreta.
+     * 
+     * @param g Contexto gráfico para renderização
+     */
     @Override
     public void desenharTela(Graphics g) {
         if(estado != EstadoJogo.PARADO){
@@ -157,6 +191,9 @@ public class TelaSecreta extends TelaBase{
         }
     }
 
+    /**
+     * Realiza limpeza de recursos antes da tela ser descartada.
+     */
     public void cleanUp() {
         // Parar o timer
         if (timer != null && timer.isRunning()) {

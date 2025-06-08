@@ -12,30 +12,55 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
+/** 
+ * Classe da Tela de lutas contra boss do jogo
+ * 
+ * @author Arthur dos Santos Rezende
+ * @version 1.0
+*/
 public class TelaBoss extends TelaBase{
+    /** Variável usada para gerenciar o boss atual */
     private BossManager bossManager;
+    /** O layout da dungeon do boss atual */
     private BossManager.BossLayout layout;
+    /** Número identificador do boss atual (0 a 6) */
     private int bossNum;
+    /** Uma lista contendo todos os objetos colidíveis presentes na tela */
     private ArrayList<ObjetoColidivel> objetosColidiveis = new ArrayList<>();
+    /** Botão para pausar o jogo */
     private JButton pauseButton = new JButton("Pausa");
+    /** O personagem jogável do jogo (Duque Batata, ou o caça X-Salada na luta final) */
     private Player batata;
+    /** O leitor te teclas responsável por controlar o jogador */
     private GameKeyAdapter gameKeyAdapter;
+    /** Uma lista para gerenciar os projéteis do jogador (as cenouras) */
     private ArrayList<Projetil> cenouras = new ArrayList<>();
+    /** O intervalo entre cada tiro do jogador (0,3 s) */
     private static final long INTERVALO_TIRO = 300;
+    /** O boss atual */
     private Boss curBoss;
+    /** Uma lista contendo todas as paredes presentes na tela */
     private ArrayList<Parede> paredes = new ArrayList<>();
+    /** A porta onde o jogador deve entrar para passar para o próximo mundo (ou entrar na sala secreta, no caso do boss secreto) */
     private Porta porta;
+    /** Uma lista contendo todas as partículas de alerta presentes na tela */
     private ArrayList<Alert> alertas = new ArrayList<>();
+    /** Uma lista contendo todas as partículas de pof! presentes na tela */
     private ArrayList<Pof> pofs = new ArrayList<>();
-    //Imagens
-    private ImageIcon iconPause; private Image[] backgroundImgs; private Image alertImage; private Image pofImage;
-    private Image paredeImg; private Image[] portaImgs; private Image[] batataImgs; private Image[] cenouraImgs;
-    private Image[] gigaSlimeImgs; private Image lancaChamasImg; private Image[] sirPlatohImgs; private Image garfoImg;
-    private Image[] facaImgs; private Image[] mofadaBombadaImgs; private Image bracoImg; private Image luvaImg;
-    private Image mofoImg; private Image[] cerberoNimbusImgs; private Image algodaoImg; private ImageIcon vladmirCenoura;
-    private Image[] larryImgs; private Image teiaImg; private Image[] fioImgs; private Image naveMareanhaImg;
-    private Image[] cappuccinoImgs;
+    /** Imagem do ícone de pausa */
+    private ImageIcon iconPause, vladmirCenoura;
+    /** Imagens únicas */
+    private Image alertImage, pofImage, paredeImg, lancaChamasImg, garfoImg, bracoImg, luvaImg, mofoImg, algodaoImg, teiaImg, naveMareanhaImg;
+    /** Arrays de imagens */
+    private Image[] backgroundImgs, portaImgs, batataImgs, cenouraImgs, gigaSlimeImgs, sirPlatohImgs, facaImgs, mofadaBombadaImgs,
+    cerberoNimbusImgs, larryImgs, fioImgs, cappuccinoImgs;
     
+    /**
+     * Construtor da tela de boss
+     * 
+     * @param musica Player de música compartilhado entre telas
+     * @param bossNum Número identificador do boss
+     */
     public TelaBoss(MusicPlayer musica, int bossNum){
         super(musica);
         this.bossNum = bossNum;
@@ -51,6 +76,13 @@ public class TelaBoss extends TelaBase{
         start();
     }
 
+    /**
+     * Inicia a luta
+     * <p>
+     * Inicia o timer e muda o estado do jogo para RODANDO, carrega o boss atual, o jogador e a porta.
+     * </p>
+     * 
+     */
     public void start(){
         cleanKeyListeners();
         resetKeyState();
@@ -76,6 +108,9 @@ public class TelaBoss extends TelaBase{
         timer.start();
     }
 
+    /**
+     * Configura o botão de pausa. Ao ser apertado, o jogo é pausado
+     */
     public void pauseButton(){
         try {
             // Carregar imagem do ícone de pausa
@@ -97,6 +132,9 @@ public class TelaBoss extends TelaBase{
         });
     }
 
+    /**
+     * Mostra o menu de pausa. A partir dele, o jogador pode continuar o jogo ou voltar para a tela inicial
+     */
     private void mostrarPausa(){
         if(estado == EstadoJogo.RODANDO) {
             estado = EstadoJogo.PAUSADO;
@@ -127,6 +165,9 @@ public class TelaBoss extends TelaBase{
         }
     }
     
+    /**
+     * Carrega a tela inicial
+     */
     private void voltarParaMenu(){
         musica.stopSong();
         efeito.stopSong();
@@ -142,6 +183,9 @@ public class TelaBoss extends TelaBase{
         telaInicio.requestFocusInWindow();
     }
 
+    /**
+     * Carrega as imagens necessárias para a tela de jogo.
+     */
     public void carregarImagens(){
         backgroundImgs = new Image[7];
         batataImgs = new Image[10]; cenouraImgs = new Image[4]; portaImgs = new Image[2]; gigaSlimeImgs = new Image[3];
@@ -237,6 +281,11 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Renderiza os elementos visuais da tela de boss, incluindo todos os objetos colidíveis e partículas.
+     * 
+     * @param g Contexto gráfico para renderização
+     */
     @Override
     public void desenharTela(Graphics g) {
         if(estado != EstadoJogo.PARADO){
@@ -528,6 +577,16 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Manipula eventos de ação.
+     * 
+     * <p>
+     * Atualiza o estado de todos os objetos colidíveis e as interações entre eles, além das partículas de pof!.
+     * Solicita a repintura do componente a cada intervalo definido no timer.
+     * </p>
+     * 
+     * @param e Evento de ação disparado
+     */
     public void actionPerformed(ActionEvent e) {
         if(estado == EstadoJogo.RODANDO) {
             // Atualiza as cenouras
@@ -605,6 +664,9 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Mostra uma caixa de diálgo após a luta contra o Larry ter terminado
+     */
     private void playCutscene(){
         if(!musica.isPlaying()){
             musica.playSong("assets/siren-alert.wav", true);
@@ -642,6 +704,9 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Carrega a tela de Game Over
+     */
     private void gameOver(){
         musica.stopSong();
         efeito.stopSong();
@@ -661,6 +726,9 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Carrega a tela de Vitória
+     */
     private void youWin(){
         musica.stopSong();
         efeito.stopSong();
@@ -680,15 +748,41 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /** 
+     * Classe para os bosses do jogo
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private abstract class Boss extends ObjetoColidivel {
+        /** O tamnaho do boss (o padrão é 250px/200px) */
         protected int tamanho;
-        protected int hp, maxHp;
+        /** Os pontos de vida do boss */
+        protected int hp;
+        /** A quantidade de pontos de vida máxima do boss */
+        protected int maxHp;
+        /** Indica se o boss está vivo */
         protected boolean isAlive = true;
-        protected String nome, caminho;
+        /** Nome do boss */
+        protected String nome;
+        /** Caminho do som de dano do boss */
+        protected String caminho;
+        /** Partícula de alerta que aparece quando o boss realiza certos ataques */
         protected Alert alerta;
+        /** Timer compartilhado entre bosses para certos ataques */
         protected long timer = 0;
-        protected boolean isAttacking = false, triggered = false;
+        /** Indica se o boss está usando certos ataques */
+        protected boolean isAttacking = false;
+        /** Indica se o boss está em alerta (estado intermediário antes de atacar) */
+        protected boolean triggered = false;
         
+        /**
+         * Construtor da classe Boss
+         * 
+         * @param tamanho tamanho
+         * @param cor Cor
+         * @param hp Pontos de vida
+         */
         public Boss(int tamanho, Color cor, int hp) {
             super(LARGURA_TELA/2 - tamanho/2, 100, tamanho, (tamanho*4)/5, cor, CollisionLayer.ENEMY); // Tamanho do inimigo
             this.tamanho = tamanho;
@@ -698,6 +792,12 @@ public class TelaBoss extends TelaBase{
             this.timer = System.currentTimeMillis();
         }
 
+        /**
+         * Atualiza o dano causado ao boss
+         * 
+         * @param damage O dano causado
+         * @return {@code true} (esse valor só poderá se tornar {@code false} para certos bosses)
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp <= 0){
@@ -712,14 +812,34 @@ public class TelaBoss extends TelaBase{
             return true;
         }
 
+        /**
+         * Gerencia o comportamento (geralmente ataques) de cada boss
+         * Deve ser implentado por subclasses para definir seu comportamento
+         */
         public abstract void atacar();
     }
 
+    /** 
+     * Classe para o Cappuccino Assassino, o boss secreto
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class Cappuccino extends Boss {
+        /** Clones que o Cappuccino pode gerar durante a luta */
         private Projetil[] clones = new Projetil[2];
-        private int curHp, curSpot, centerPos;
+        /** Uma variável auxiliar que guarda o hp do Cappuccino em certos momentos */
+        private int curHp;
+        /** A posição atual do Cappuccino */
+        private int curSpot;
+        /** A posição central (onde o Cappuccino aparece inicialmente) */
+        private int centerPos;
+        /** Indica se o jogador falhou em encontrar o Cappuccino verdadeiro a tempo */
         private boolean fail = false;
 
+        /**
+         * Construtor da Classe Cappuccino
+         */
         public Cappuccino(){
             super(TAMANHO_BLOCO*5, new Color(87, 43, 18), 15);
             this.nome = "CAPPUCCINO  ASSASSINO";
@@ -729,6 +849,12 @@ public class TelaBoss extends TelaBase{
             this.centerPos = LARGURA_TELA/2 - tamanho/2; // Guarda a posição central
         }
 
+        /**
+         * Atualiza o dano causado ao Cappuccino
+         * 
+         * @param damage O dano causado
+         * @return {@code false} caso o Cappuccino não esteja em estado de ataque. Caso contrário, {@code true}
+         */
         public boolean takeDamage(int damage){
             if(!isAttacking) return false;
             this.hp -= damage;
@@ -744,10 +870,24 @@ public class TelaBoss extends TelaBase{
             return true;
         }
 
+        /**
+         * Cria um clone do Cappuccino (o qual, por questão de convêniencia, é considerado um projétil)
+         * 
+         * @param xPos a posição do clone
+         * @return O clone criado
+         */
         private Projetil criarClone(int xPos) {
             return new Projetil(xPos, y, largura, altura, 0, 0, Color.GRAY, true);
         }
 
+        /**
+         * Gerencia o comportamento do Cappuccino Assassino
+         * <p>
+         * Durante a luta, o Cappuccino irá para uma de três posições aleatórias e criará dois clones nas posições eme que ele não foi.
+         * O objetivo é atirar no Cappuccino verdadeiro em menos de 4 segundos, e caso o jogador atire em um clone ou o tempo acabe, o
+         * Cappuccino atacará o jogador, causando dano a ele. Tenha êxito 15 vezes e a luta estará ganha.
+         * </p>
+         */
         public void atacar(){
             if(!isAttacking){
                 if(!triggered){
@@ -824,9 +964,19 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /** 
+     * Classe para o Giga Slime, o boss do primeiro mundo
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class GigaSlime extends Boss {
+        /** O fogo do Giga Slime */
         private Projetil lancaChamas;
 
+        /**
+         * Construtor da classe GigaSlime
+         */
         public GigaSlime(){
             super(TAMANHO_BLOCO*5, Color.RED, 150);
             this.nome = "GIGA  SLIME";
@@ -834,6 +984,13 @@ public class TelaBoss extends TelaBase{
             this.curImage = gigaSlimeImgs[0];
         }
 
+        /**
+         * Gerencia o comportamento do Giga Slime
+         * <p>
+         * Durante a luta, o Giga Slime irá periodicamente soltar um bafo de fogo que dura 2 segundos e cobre a maioria
+         * da dungeon. Para desviar, o jogador deve se esconder em um dos buracos nas paredes da dungeon.
+         * </p>
+         */
         public void atacar(){
             if(!isAttacking){
                 if(System.currentTimeMillis() - timer >= 3500 && !triggered){
@@ -879,10 +1036,23 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /** 
+     * Classe para o Sir. Platoh, o boss do segundo mundo
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class SirPlatoh extends Boss {
-        private Projetil garfo, faca;
-        private int lastAttack = 1; //Guarda o último ataque usado. 0 é garfo e 1 é faca
+        /** O garfo do Platoh */
+        private Projetil garfo;
+        /** A faca do Platoh */
+        private Projetil faca;
+        /** Guarda o último ataque usado. 0 é garfo e 1 é faca */
+        private int lastAttack = 1;
 
+        /**
+         * Construtor da Classe SirPlatoh
+         */
         public SirPlatoh(){
             super(TAMANHO_BLOCO*5, Color.WHITE, 225);
             this.nome = "SIR.  PLATOH";
@@ -890,6 +1060,13 @@ public class TelaBoss extends TelaBase{
             this.curImage = sirPlatohImgs[0];
         }
 
+        /**
+         * Gerencia o comportamento do Sir. Platoh
+         * <p>
+         * Durante a luta, Platoh ira alternar entre ataques de garfo e faca. O garfo vai e volta em linha reta na parte
+         * esquerda da dungeon, e a faca age como um bumerangue, cobrindo primeiramente a parte direita da dungeon, depois a esquerda
+         * </p>
+         */
         public void atacar(){
             if(!isAttacking){
                 if(System.currentTimeMillis() - timer >= 3000 && !triggered){
@@ -970,13 +1147,27 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /** 
+     * Classe para a Mofada Bombada, a boss do terceiro mundo
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class MofadaBombada extends Boss {
+        /** Um dos braços da Mofada */
         private Projetil braco;
+        /** Uma lista para gerenciar os projéteis da Mofada (as bolas de mofo) */
         private ArrayList<Projetil> bolasDeMofo = new ArrayList<>();
-        private Direction lastAttack = Direction.LEFT; //Guarda a direção do último ataque de braço usado.
+        /** Guarda a direção do último ataque de braço usado. */
+        private Direction lastAttack = Direction.LEFT;
+        /** Guarda a última vez que uma bola de mofo foi lançada */
         private long ultimoTiro = 0;
+        /** Indica se a Mofada tentou socar o jogador com um dos braços */
         private boolean hasPunched = false;
 
+        /**
+         * Construtor da classe MofadaBombada
+         */
         public MofadaBombada(){
             super(TAMANHO_BLOCO*5, Color.GREEN, 9);
             this.nome = "MOFADA  BOMBADA";
@@ -984,6 +1175,14 @@ public class TelaBoss extends TelaBase{
             this.curImage = mofadaBombadaImgs[0];
         }
 
+        /**
+         * Gerencia o comportamento da Mofada Bombada
+         * <p>
+         * Durante a luta, Mofada irá periodicamente tentar socar o jogador, alternando entre seus dois braços. Enquanto prepara o
+         * soco, ela gira o seu braço, lançando bolas de mofo no jogador no processo. O único jeito de causar dano à Mofada
+         * é atirar nos braços dela, mas em compensação, seu hp é o mais baixo entre todos os bosses.
+         * </p>
+         */
         public void atacar(){
             if(!isAttacking){
                 if(System.currentTimeMillis() - timer >= 3000 && !triggered){
@@ -1085,13 +1284,27 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /** 
+     * Classe para o Cérbero Nimbus, o boss do quarto mundo
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class CerberoNimbus extends Boss {
+        /** Uma lista para gerenciar os algodões deixados pelo Cérbero ao rolar ou balançar */
         private ArrayList<Projetil> algodoes = new ArrayList<>();
-        private int lastAttack = 1; //Guarda o último ataque usado. 0 é balançar e 1 é rolar
+        /** Guarda o último ataque usado. 0 é balançar e 1 é rolar */
+        private int lastAttack = 1;
+        /** Lugar seguro para o jogador se esconder durante a luta */
         private int skipSpot;
+        /** Partículas de alertas que aparecem quando o Cérbero balança seu pelo */
         private Alert[] shakeAlerts = new Alert[6];
+        /** Última direção do Cérbero */
         private Direction ultimaDirecao = Direction.DOWN;
 
+        /**
+         * Construtor da classe CerberoNimbus
+         */
         public CerberoNimbus(){
             super(TAMANHO_BLOCO*5, Color.PINK, 150);
             this.nome = "CÉRBERO  NIMBUS";
@@ -1099,6 +1312,12 @@ public class TelaBoss extends TelaBase{
             this.curImage = cerberoNimbusImgs[0];
         }
 
+        /**
+         * Atualiza o dano causado ao Cérbero, e remove os alertas caso seja derrotado
+         * 
+         * @param damage O dano causado
+         * @return O retorno é sempre {@code true} nesse caso
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp <= 0){
@@ -1119,6 +1338,9 @@ public class TelaBoss extends TelaBase{
             return true;
         }
 
+        /**
+         * Gera os avisos antes do Cérbero balançar o corpo
+         */
         private void genWarning(){
             skipSpot = new Random().nextInt(6);
             efeito.playSong("assets/warning.wav", false);
@@ -1132,6 +1354,8 @@ public class TelaBoss extends TelaBase{
                 alertas.add(shakeAlerts[i]);
             }
         }
+
+        /** Remove o algodão nas paredes antes do Céerbero começar a balançar o corpo */
         private void desativarExistentes() {
             Iterator<Projetil> it = algodoes.iterator();
             while (it.hasNext()) {
@@ -1143,6 +1367,8 @@ public class TelaBoss extends TelaBase{
                 }
             }
         }
+
+        /** Gera algodão indestrutível nas paredes após o cérbero balançar o corpo */
         private void genShakingCotton(){
             desativarExistentes();
             for(int i = 0; i < 6; i++){
@@ -1159,6 +1385,8 @@ public class TelaBoss extends TelaBase{
                 p.curImage = algodaoImg;
             }
         }
+
+        /** Gera algodão enquanto o algodog rola */
         private void genRollingCotton(){
             int a = new Random().nextInt(5);
             int b = new Random().nextInt(5);
@@ -1191,6 +1419,14 @@ public class TelaBoss extends TelaBase{
             }
         }
 
+        /**
+         * Gerencia o comportamento do Cérbero Nimbus
+         * <p>
+         * Durante a luta, Cérbero irá periodicamente rolar para frente e para trás, gerando algodão de maneira semi-aleatória no caminho, assim
+         * como um algodog doce. Para desviar do Cérbero enquanto rola, o jogador deverá se esconder em um dos buracos nas paredes da dungeon.
+         * Porém, antes de começar a rolar, Cérbero irá balançar o seu corpo, cobrindo 5 dos 6 buracos com algodão indestrutível.
+         * </p>
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -1283,7 +1519,7 @@ public class TelaBoss extends TelaBase{
                     batata.takeDamage(1);
                 }
                     
-                // Remove se o Cerbero morreu
+                // Remove se o Cérbero morreu
                 if (!this.isAlive) p.desativar();
 
                 // Verifica se foi destruido
@@ -1298,20 +1534,48 @@ public class TelaBoss extends TelaBase{
             }
         }
 
+        /** 
+         * Classe para a construção dos algodões gerados pelo Cérbero
+         * 
+         * @author Arthur dos Santos Rezende
+         * @version 1.0
+         */
         public class AlgodaoFactory {
+            /**
+             * Cria um novo algodão
+             * 
+             * @param x Posição x
+             * @param y Posição y
+             * @param isCollidable Indica se o algodão pode ser destruído por projéteis do jogador
+             * @return O algodão criado
+             */
             public static Projetil createProjectile(int x, int y, boolean isCollidable) {
                 return new Projetil(x, y, TAMANHO_BLOCO, TAMANHO_BLOCO, 0, 0, Color.PINK, isCollidable);
             }
         }
     }
 
+    /** 
+     * Classe para Larry, o Muquiaranha, boss do quinto mundo
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class Larry extends Boss{
+        /** Uma lista para quardar as teias do Larry */
         private ArrayList<Projetil> teias = new ArrayList<>();
+        /** Uma lista para quardar os fios do Larry */
         private ArrayList<Projetil> fios = new ArrayList<>();
+        /** Guarda a última vez que o Larry atirou */
         private long ultimoTiro = 0;
-        private boolean inDespair = false; //Se refere ao segundo set de fios
+        /** Indica se o Larry soltou o segundo set de fios */
+        private boolean inDespair = false;
+        /** Partículas de alerta que aparecem quando o Larry solta os seus fios */
         private Alert[] stringAlerts = new Alert[2];
 
+        /**
+         * Construtor da classe Larry
+         */
         public Larry(){
             super(TAMANHO_BLOCO*5, Color.BLACK, 225);
             this.nome = "LARRY,  O  MUQUIARANHA";
@@ -1319,12 +1583,21 @@ public class TelaBoss extends TelaBase{
             this.curImage = larryImgs[0];
         }
 
+        /**
+         * Atualiza o dano causado ao Larry
+         * 
+         * @param damage O dano causado
+         * @return O retorno é sempre {@code true} nesse caso
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp > 0) efeito.playSong(caminho, false);
             return true;
         }
 
+        /**
+         * Mostra a "animação" de derrota do Larry
+         */
         public void playDefeatAnimation(){
             if(!triggered){
                 if(musica.isPlaying()) musica.stopSong();
@@ -1344,6 +1617,13 @@ public class TelaBoss extends TelaBase{
             }
         }
 
+        /**
+         * Gerencia o comportamento do Larry
+         * <p>
+         * Durante a luta, Larry irá atirar teias na direção do jogador de forma semi-aleatória. Ao perder 50% e 95% do seu hp, Larry irá
+         * soltar fios nos cantos da dungeon, limitando onde o jogador pode desviar das teias.
+         * </p>
+         */
         public void atacar(){
             long now = System.currentTimeMillis();
             if(hp <= 0) playDefeatAnimation();
@@ -1467,14 +1747,29 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /** 
+     * Classe para a Nave Mãeranha, boss final do jogo
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class NaveMaeranha extends Boss{
+        /** Uma lista para quardar as teias da nave */
         private ArrayList<Projetil> teias = new ArrayList<>();
+        /** Uma lista para quardar os fios da nave */
         private ArrayList<Projetil> fios = new ArrayList<>();
+        /** Guarda a última vez que a nave atirou */
         private long ultimoTiro = 0;
+        /** Partículas de alerta que aparecem quando a nave solta os seus fios */
         private Alert[] stringAlerts = new Alert[2];
-        private int[] stringYs = new int[2]; //Guarda onde os fios vão aparecer
+        /** Guarda onde os fios vão aparecer */
+        private int[] stringYs = new int[2];
+        /** Indica se a nave perdeu todos os seus pontos de vida */
         private boolean isBlowingUp = false;
 
+        /**
+         * Construtor da classe NaveMaeranha
+         */
         public NaveMaeranha(){
             super(LARGURA_TELA, Color.DARK_GRAY, 450);
             this.x = 0; this.y = 0; this.altura = 250;
@@ -1483,12 +1778,21 @@ public class TelaBoss extends TelaBase{
             this.curImage = naveMareanhaImg;
         }
 
+        /**
+         * Atualiza o dano causado à nave
+         * 
+         * @param damage O dano causado
+         * @return O retorno é sempre {@code true} nesse caso
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp > 0) efeito.playSong(caminho, false);
             return true;
         }
 
+        /**
+         * Mostra a "animação" de derrota da nave
+         */
         public void playDefeatAnimation(){
             if(!isBlowingUp){
                 if(musica.isPlaying()) musica.stopSong();
@@ -1511,6 +1815,9 @@ public class TelaBoss extends TelaBase{
             }
         }
 
+        /**
+         * Gera as teias da nave
+         */
         public void genTeias(){
             long now = System.currentTimeMillis();
             if (now - ultimoTiro > INTERVALO_TIRO*3) {
@@ -1526,6 +1833,9 @@ public class TelaBoss extends TelaBase{
             }
         }
 
+        /**
+         * Gera os avisos antes da nave soltar os seus fios
+         */
         public void genWarning(){
             efeito.playSong("assets/warning.wav", false);
             for(int i = 0; i < 2; i++){
@@ -1538,6 +1848,9 @@ public class TelaBoss extends TelaBase{
             timer = System.currentTimeMillis();
         }
 
+        /**
+         * Gera os fios da nave
+         */
         public void genString(){
             for(int i = 0; i < 2; i++){
                 Projetil f = new Projetil(TAMANHO_BLOCO*2, stringYs[i], LARGURA_TELA - TAMANHO_BLOCO*4 ,TAMANHO_BLOCO/2,
@@ -1552,6 +1865,12 @@ public class TelaBoss extends TelaBase{
             isAttacking = true;
         }
 
+        /**
+         * Gerencia o comportamento da Nave Mãeranha
+         * <p>
+         * Durante a luta, a nave irá atirar teias na direção do jogador de forma semi-aleatória. Periodicamente, a nave irá
+         * soltar fios em duas de quatro posições, limitando onde o jogador pode desviar das teias.
+         */
         public void atacar(){
             if(hp <= 0) playDefeatAnimation();
             else{
@@ -1618,6 +1937,12 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Gerencia a colisão entre paredes e outros objetos colidíveis, além da colisão entre bosses e o jogador.
+     * 
+     * @param entity A entidade colidindo com a parede
+     * @return {@code true} se a colisão aconteceu. Caso contrário, {@code false}
+     */
     private boolean verificarColisaoParede(ObjetoColidivel entity) {         
         if(entity.layer == ObjetoColidivel.CollisionLayer.PLAYER){
             Player jogador = (Player) entity;
@@ -1660,16 +1985,30 @@ public class TelaBoss extends TelaBase{
         return false;
     }
 
+    /**
+     * Classe para o leitor te teclas responsável por controlar o jogador
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     public class GameKeyAdapter extends KeyAdapter {
+        /** Set guardando as teclas de movimento (teclas direcionais) ativas */
         private final Set<Integer> activeMovementKeys = new HashSet<>();
+        /** Set guardando as teclas de tiro (teclas A,W,S e D) ativas */
         private final Set<Integer> activeShootingKeys = new HashSet<>();
+        /** Última direção de movimento do jogador */
         private Direction ultimaDirecaoMovimento = Direction.RIGHT;
+        /** Última direção de tiro do jogador */
         private Direction ultimaDirecaoTiro = null;
+        /** Guarda a última vez que o jogador atirou */
         private long ultimoTiro = 0;
+        /** Timer para processar ações do jogador de forma contínua (~60 FPS)*/
         private Timer continuousActionTimer;
 
+        /**
+         * Construtor da classe GameKeyAdapter
+         */
         public GameKeyAdapter() {
-            // Timer para processar ações de forma contínua (~60 FPS)
             continuousActionTimer = new Timer(16, e -> {
                 processMovement();
                 processShooting();
@@ -1678,6 +2017,11 @@ public class TelaBoss extends TelaBase{
             continuousActionTimer.start();
         }
 
+        /**
+         * Chamado quando alguma tecla é pressionada.
+         * 
+         * @param e O evento a ser processado
+         */
         @Override
         public void keyPressed(KeyEvent e) {
             int code = e.getKeyCode();
@@ -1693,6 +2037,11 @@ public class TelaBoss extends TelaBase{
             }
         }
 
+        /**
+         * Chamado quando alguma tecla é solta.
+         * 
+         * @param e O evento a ser processado
+         */
         @Override
         public void keyReleased(KeyEvent e) {
             int code = e.getKeyCode();
@@ -1708,16 +2057,31 @@ public class TelaBoss extends TelaBase{
             }
         }
 
+        /**
+         * Verifica se a tecla apertada é uma tecla direcional
+         * 
+         * @param code o código da tela apertada
+         * @return {@code true} caso seja uma tecla direcional. Caso contrário, {@code false}
+         */
         private boolean isMovementKey(int code) {
             return code == KeyEvent.VK_LEFT || code == KeyEvent.VK_RIGHT || 
                 code == KeyEvent.VK_UP || code == KeyEvent.VK_DOWN;
         }
 
+        /**
+         * Verifica se a tecla apertada é A,W,S ou D
+         * 
+         * @param code o código da tela apertada
+         * @return {@code true} caso seja A,W,S ou D. Caso contrário, {@code false}
+         */
         private boolean isShootingKey(int code) {
             return code == KeyEvent.VK_A || code == KeyEvent.VK_D || 
                 code == KeyEvent.VK_W || code == KeyEvent.VK_S;
         }
 
+        /**
+         * Processa o movimento do jogador
+         */
         private void processMovement() {
             if (activeMovementKeys.isEmpty()) {
                 return;
@@ -1767,6 +2131,9 @@ public class TelaBoss extends TelaBase{
             }
         }
 
+        /**
+         * Processa os tiros do jogador
+         */
         private void processShooting() {
             if (activeShootingKeys.isEmpty()) return;
             
@@ -1812,6 +2179,9 @@ public class TelaBoss extends TelaBase{
             }
         }
 
+        /**
+         * Atualiza a imagem atual do jogador baseado no que ele está fazendo no moemento
+         */
         private void updateAnimation() {
             boolean isAtirando = (System.currentTimeMillis() - ultimoTiro) < 200 && ultimaDirecaoTiro != null;
             boolean isMoving = !activeMovementKeys.isEmpty();
@@ -1836,7 +2206,7 @@ public class TelaBoss extends TelaBase{
             }
         }
         
-        // Método para parar o timer quando necessário
+        /** Para o timer de ação contínua*/
         public void dispose() {
             if (continuousActionTimer != null) {
                 continuousActionTimer.stop();
@@ -1844,6 +2214,7 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /** Carrega a tela da sala secreta */
     private void acessSecretRoom(){
         saveCapuData(); // Deixa o jogo saber q o Cappuccino foi derrotado
         musica.stopSong();
@@ -1860,6 +2231,9 @@ public class TelaBoss extends TelaBase{
         telaSecreta.requestFocusInWindow();
     }
 
+    /**
+     * Salva no arquivo de save do boss secreto o fato que ele foi derrotado
+     */
     public void saveCapuData() {
         try {
             File saveFile = new File("save_data/cappuccino.dat");
@@ -1883,6 +2257,9 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Carrega a tela de jogo
+     */
     public void returnToGame(){
         musica.stopSong();
         efeito.stopSong();
@@ -1936,6 +2313,11 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Carrega a tela de batalha contra um boss.
+     * 
+     * @param bossNum Número identificador do boss (6 para o boss final)
+     */
     public void loadBoss(int bossNum){
         musica.stopSong();
         efeito.stopSong();
@@ -1955,11 +2337,23 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Classe de gerenciamento das dungeons de boss
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     public class BossManager {
+        /** Lista dos layouts de todas as dungeons de boss*/
         private ArrayList<BossLayout> bossDungeons;
+        /** O boss atual */
         private int currentBoss;
+        /** A quantidade de bosses (7) */
         private int bossAmount;
         
+        /**
+         * Construtor da classe BossManager
+         */
         public BossManager() {
             bossDungeons = new ArrayList<>();
             bossAmount = 7;
@@ -1970,17 +2364,37 @@ public class TelaBoss extends TelaBase{
             currentBoss = bossNum;
         }
         
+        /**
+         * Retorna o boss atual
+         * 
+         * @return o boss atual
+         */
         public BossLayout getCurrentBoss() {
             return bossDungeons.get(currentBoss);
         }
 
-        
+        /**
+         * Classe para os layouts das dungeon de boss
+         * 
+         * @author Arthur dos Santos Rezende
+         * @version 1.0
+         */
         public class BossLayout {
+            /** O número do boss atual */
             int lay;
+
+            /**
+             * Construtor da classe BossLayout
+             * 
+             * @param lay O número do boss a ser carregado
+             */
             public BossLayout(int lay){
                 this.lay = lay;
             }
             
+            /**
+             * Adciona as paredes da dungeon
+             */
             void getParedes(){
                 if(lay > 0 && lay != 6){
                     paredes.add(new Parede(0, 0, TAMANHO_BLOCO*9, ALTURA_TELA));
@@ -2029,6 +2443,9 @@ public class TelaBoss extends TelaBase{
                 for (Parede paredes : paredes) objetosColidiveis.add(paredes);
             }
 
+            /**
+             * Adiciona o boss
+             */
             void getBoss(){
                 switch(lay){
                     case 0: curBoss = new Cappuccino(); break;
@@ -2044,6 +2461,9 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Realiza limpeza de recursos antes da tela ser descartada.
+     */
     public void cleanUp() {
         // Parar sistemas
         estado = EstadoJogo.PARADO;
@@ -2077,6 +2497,11 @@ public class TelaBoss extends TelaBase{
         System.gc();
     }
 
+    /**
+     * Limpa um array de imagem
+     * 
+     * @param imgs o array a ser limpo
+     */
     private void cleanImgArray(Image[] imgs){
         if (imgs != null) {
             for (int i = 0; i < imgs.length; i++) imgs[i] = null;
@@ -2084,17 +2509,25 @@ public class TelaBoss extends TelaBase{
         }
     }
 
+    /**
+     * Limpa o leitor de teclas
+     */
     private void cleanKeyListeners() {
         for (KeyListener kl : getKeyListeners()) {
             removeKeyListener(kl);
         }
     }
 
+    /**
+     * Garante que todas as teclas são liberadas
+     */
     private void resetKeyState() {
-        // Garante que todas as teclas são liberadas
         KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
     }
 
+    /**
+     * Método de limpeza parcial
+     */
     private void softClean() {
         paredes.clear();
         cenouras.clear();

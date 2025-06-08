@@ -16,30 +16,56 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 
+/** 
+ * Classe da Tela principal do jogo
+ * 
+ * @author Arthur dos Santos Rezende
+ * @version 1.0
+*/
 public class TelaJogo extends TelaBase {
+    /** Variável usada para gerenciar a dungeon atual */
     private DungeonManager dungeonManager;
+    /** O layout da dungeon atual */
     private DungeonManager.DungeonLayout layout;
+    /** Uma lista contendo todos os objetos colidíveis presentes na tela */
     private ArrayList<ObjetoColidivel> objetosColidiveis = new ArrayList<>();
+    /** Botão para pausar o jogo */
     private JButton pauseButton = new JButton("Pausa");
+    /** O personagem jogável do jogo (Duque Batata) */
     private Player batata;
+    /** O leitor te teclas responsável por controlar o jogador */
     private GameKeyAdapter gameKeyAdapter;
+    /** Uma lista para gerenciar os projéteis do jogador (as cenouras) */
     private ArrayList<Projetil> cenouras = new ArrayList<>();
+    /** O intervalo entre cada tiro do jogador (0,3 s) */
     private static final long INTERVALO_TIRO = 300;
+    /** Uma lista contendo todos os inimigos presentes na tela */
     private ArrayList<Inimigo> inimigos = new ArrayList<>();
+    /** Guarda a quantidade de inimigos na tela */
     private int enemyCount;
+    /** Uma lista contendo todas as paredes presentes na tela */
     private ArrayList<Parede> paredes = new ArrayList<>();
+    /** A porta onde o jogador deve entrar para passar para a próxima dungeon */
     private Porta porta;
+    /** Uma lista contendo todas as partículas de alerta presentes na tela */
     private ArrayList<Alert> alertas = new ArrayList<>();
+    /** Uma lista contendo todas as partículas de pof! presentes na tela */
     private ArrayList<Pof> pofs = new ArrayList<>();
-    //Imagens
-    private ImageIcon iconPause; private Image[] backgroundImgs; private Image alertImage;
-    private Image pofImage; private Image paredeImg; private Image[] portaImgs;
-    private Image[] batataImgs; private Image[] cenouraImgs; private Image[] slimeImgs; private Image[] flymeImgs;
-    private Image[] pratoImgs; private Image[] facaImgs; private Image[] armandibulaImgs; private Image[] morcerangoImgs;
-    private Image[] queijoBoxerImgs; private Image[] bracoImgs; private Image[] luvaImgs; private Image[] chocochatoImgs;
-    private Image[] algodogDoceImgs; private Image algodaoImg; private Image[] slimeBotImgs; private Image[] laserImgs;
-    private Image[] gigaBotImgs; private Image[] gLaserImgs; private Image[] malandranhaImgs; private Image[] alhoImgs;
+    /** Imagem do ícone de pausa */
+    private ImageIcon iconPause;
+    /** Imagens únicas */
+    private Image alertImage, pofImage, paredeImg, algodaoImg;
+    /** Arrays de imagens */
+    private Image[] backgroundImgs, portaImgs, batataImgs, cenouraImgs, slimeImgs, flymeImgs, pratoImgs, facaImgs, armandibulaImgs,
+    morcerangoImgs, queijoBoxerImgs, bracoImgs, luvaImgs, chocochatoImgs, algodogDoceImgs, slimeBotImgs, laserImgs, gigaBotImgs,
+    gLaserImgs, malandranhaImgs, alhoImgs;
 
+    /**
+     * Construtor da tela de jogo
+     * 
+     * @param musica Player de música compartilhado entre telas
+     * @throws IOException Se ocorrer um erro de I/O durante a leitura do arquivo de save
+     */
     TelaJogo(MusicPlayer musica) throws IOException {
         super(musica);
         readSaveData();
@@ -60,6 +86,11 @@ public class TelaJogo extends TelaBase {
         start();
     }
 
+    /**
+     * Lê o arquivo de save para determinar qual mundo deve ser carregado
+     * 
+     * @throws IOException Se ocorrer um erro de I/O durante a leitura do arquivo de save
+     */
     public void readSaveData() throws IOException {
         Scanner s = null;
         try {
@@ -113,6 +144,12 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /** 
+     * Cria um novo arquivo de save com o valor padrão (1).
+     * 
+     * @param saveFile Arquivo a ser criado
+     * @throws IOException Se ocorrer um erro de I/O durante a criação do arquivo
+     */
     private void newSave(File saveFile) throws IOException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(saveFile))) {
             writer.println("1");
@@ -120,6 +157,13 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Inicia o jogo
+     * <p>
+     * Inicia o timer e muda o estado do jogo para RODANDO, carrega o layout inicial do mundo atual, o jogador e a porta.
+     * </p>
+     */
+    @Override
     public void start(){
         cleanKeyListeners();
         resetKeyState();
@@ -145,6 +189,9 @@ public class TelaJogo extends TelaBase {
         timer.start();
     }
 
+    /**
+     * Configura o botão de pausa. Ao ser apertado, o jogo é pausado
+     */
     public void pauseButton(){
         try {
             // Carregar imagem do ícone de pausa
@@ -166,6 +213,9 @@ public class TelaJogo extends TelaBase {
         });
     }
 
+    /**
+     * Mostra o menu de pausa. A partir dele, o jogador pode continuar o jogo ou voltar para a tela inicial
+     */
     private void mostrarPausa(){
         if(estado == EstadoJogo.RODANDO) {
             estado = EstadoJogo.PAUSADO;
@@ -196,6 +246,9 @@ public class TelaJogo extends TelaBase {
         }
     }
     
+    /**
+     * Carrega a tela inicial
+     */
     private void voltarParaMenu(){
         musica.stopSong();
         efeito.stopSong();
@@ -211,6 +264,9 @@ public class TelaJogo extends TelaBase {
         telaInicio.requestFocusInWindow();
     }
 
+    /**
+     * Carrega as imagens necessárias para a tela de jogo.
+     */
     public void carregarImagens(){
         backgroundImgs = new Image[5];
         batataImgs = new Image[8]; cenouraImgs = new Image[4]; slimeImgs = new Image[2]; flymeImgs = new Image[6];
@@ -329,6 +385,12 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Renderiza os elementos visuais da tela de jogo, incluindo todos os objetos colidíveis e partículas.
+     * 
+     * @param g Contexto gráfico para renderização
+     
+     */
     @Override
     public void desenharTela(Graphics g) {
         if(estado != EstadoJogo.PARADO){
@@ -541,6 +603,16 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Manipula eventos de ação.
+     * 
+     * <p>
+     * Atualiza o estado de todos os objetos colidíveis e as interações entre eles, além das partículas de pof!.
+     * Solicita a repintura do componente a cada intervalo definido no timer.
+     * </p>
+     * 
+     * @param e Evento de ação disparado
+     */
     public void actionPerformed(ActionEvent e) {
         if(estado == EstadoJogo.RODANDO) {
             enemyCount = inimigos.size();
@@ -619,6 +691,9 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Carrega a tela de Game Over
+     */
     private void gameOver(){
         musica.stopSong();
         efeito.stopSong();
@@ -638,14 +713,38 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /** 
+     * Classe para os inimigos do jogo
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private abstract class Inimigo extends ObjetoColidivel {
+        /** O tamanho do inimigo (o padrão é 50px) */
         protected int tamanho;
+        /** Os pontos de vida do inimigo (o padrão é 1) */
         protected int hp;
+        /** A velocidade do inimigo (se ele é estacionário, o valor é 0) */
         protected int velocidade;
+        /** A última direção do inimigo */
         protected Direction ultimaDirecao;
+        /** Indica se o inimigo pode passar por cima de paredes */
         protected boolean isFlying;
+        /** Indica se o inimigo está vivo */
         protected boolean isAlive = true;
         
+        /**
+         * Construtor da classe Inimigo
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param tamanho Tamanho
+         * @param cor Cor
+         * @param hp Pontos de vida
+         * @param velocidade Velocidade
+         * @param ultimaDirecao Última direção
+         * @param isFlying Voa/Escala sobre paredes?
+         */
         public Inimigo(int x, int y, int tamanho, Color cor, int hp, int velocidade, Direction ultimaDirecao, boolean isFlying) {
             super(x, y, tamanho, tamanho, cor, CollisionLayer.ENEMY); // Tamanho do inimigo
             this.tamanho = tamanho;
@@ -656,6 +755,12 @@ public class TelaJogo extends TelaBase {
             this.isFlying = isFlying;
         }
 
+        /**
+         * Atualiza o dano causado ao inimigo
+         * 
+         * @param damage O dano causado
+         * @return {@code true} (esse valor só poderá se tornar {@code false} para certos inimigos)
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp <= 0){
@@ -666,20 +771,53 @@ public class TelaJogo extends TelaBase {
             return true;
         }
 
+        /**
+         * Gerencia o comportamento (movimentação e ataques) de cada inimigo
+         * Deve ser implentado por subclasses para definir seu comportamento
+         */
         public abstract void atacar();
 
+        /**
+         * Campo de visão usado por certos inimigos em seus ataques
+         * @author Arthur dos Santos Rezende
+         * @version 1.0
+         */
         public class CampoDeVisao extends ObjetoColidivel{
+            /**
+             * Construtor do campo de visão
+             * 
+             * @param x Posição x
+             * @param y Posição y
+             * @param largura Largura
+             * @param altura Altura
+             */
             public CampoDeVisao(int x, int y, int largura, int altura){
                 super(x, y, largura, altura, Color.WHITE, CollisionLayer.LINE_OF_SIGHT);
             }
         }
     }
 
-    private class Slime extends Inimigo {        
+    /** 
+     * Classe para o Slime, o imimigo básico
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
+    private class Slime extends Inimigo {
+        /**
+         * Construtor da classe Slime
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param dirInicial Direção inicial
+         */     
         public Slime(int x, int y, Direction dirInicial){
             super(x, y, TAMANHO_BLOCO, Color.GREEN, 1, 2, dirInicial, false);
         }
 
+        /**
+         * Faz com que o slime se mova de um lado para o outro
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -727,11 +865,27 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /** 
+     * Classe para o Flyme, basicamente um slime que voa
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class Flyme extends Inimigo {
+        /**
+         * Construtor da classe Flyme
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param dirInicial Direção inicial
+         */  
         public Flyme(int x, int y, Direction dirInicial){
             super(x, y, TAMANHO_BLOCO, Color.CYAN, 1, 2, dirInicial, true);
         }
 
+        /**
+         * Faz com que o flyme se mova de um lado para o outro
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -799,10 +953,25 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /** 
+     * Classe para o Prato, um inimigo que atira facas em uma determinada direção
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class Prato extends Inimigo {
+        /** Uma lista para gerenciar os projéteis do prato (as facas) */
         private ArrayList<Projetil> facas = new ArrayList<>();
+        /** Guarda a última vez que o prato atirou */
         private long ultimoTiro = 0;
 
+        /**
+         * Construtor da classe Prato
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param dir Direção
+         */
         public Prato(int x, int y, Direction dir) {
             super(x, y, TAMANHO_BLOCO, Color.WHITE, 1, 0, dir, false);
             if(dir == Direction.LEFT || dir == Direction.UP){
@@ -812,6 +981,10 @@ public class TelaJogo extends TelaBase {
                 this.curImage = pratoImgs[0];
             }
         }
+
+        /**
+         * Faz com que o prato atire suas facas na direção especificada e gerencia as facas
+         */
         public void atacar(){
             long now = System.currentTimeMillis();
             int offsetX = 0, offsetY = 0;
@@ -887,7 +1060,21 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /** 
+         * Classe para a construção dos projéteis do prato (facas)
+         * 
+         * @author Arthur dos Santos Rezende
+         * @version 1.0
+         */
         public class KnifeFactory {
+            /**
+             * Cria uma nova faca
+             * 
+             * @param x Posição x
+             * @param y Posição y
+             * @param direction Direção
+             * @return O projétil criado
+             */
             public static Projetil createProjectile(int x, int y, Direction direction) {
                 int dirX = 0, dirY = 0;
                 Color color = Color.LIGHT_GRAY;
@@ -909,15 +1096,36 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /** 
+     * Classe para o Armandíbula, um inimigo que morde quem pisa nele enquanto dorme
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class Armandibula extends Inimigo {
+        /** Indicam se o armandíbula está dormindo/ em alerta */
         private boolean isSleeping = true, triggered = false;
+        /** Tempo de alerta */
         private long triggerTimer = 0;
+        /** A partícula de alerta que aparece quando o jogador pisa no (colide com o) Armandíbula */
         private Alert alerta;
 
+        /**
+         * Construtor da classe Armandibula
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         */
         public Armandibula(int x, int y){
             super(x, y, TAMANHO_BLOCO, new Color(186, 220, 88), 1, 0, Direction.UP, false);
         }
 
+        /**
+         * Atualiza o dano causado ao armandíbula
+         * 
+         * @param damage O dano causado
+         * @return {@code true} Se o armandíbula estiver acordado. Caso contrário {@code false}
+         */
         public boolean takeDamage(int damage){
             if(!isSleeping){
                 this.hp -= damage;
@@ -936,6 +1144,9 @@ public class TelaJogo extends TelaBase {
             return false;
         }
 
+        /**
+         * Faz com que o armandíbula acorde caso o jogador colida com ele.
+         */
         public void atacar(){
             if(isSleeping){
                 this.curImage = armandibulaImgs[0];
@@ -964,16 +1175,39 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /** 
+     * Classe para o Morcerango, um inimigo que dorme em paredes e acorda caso outro inimigo na mesma dungeon seja estourado.
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class Morcerango extends Inimigo {
+        /** Indicam se o morcerango está dormindo/ em alerta */
         private boolean isSleeping = true, triggered = false;
+        /** Tempo de alerta */
         private long triggerTimer = 0;
+        /** Guarda quantos inimigos haviam na dungeon inicialmente */
         private int inicialEnemyCount = -1;
+        /** A partícula de alerta que aparece quando um inimigo é estourado */
         private Alert alerta;
         
+        /**
+         * Construtor da classe Morcerango
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param dirInicial Direção inicial
+         */
         public Morcerango(int x, int y, Direction dirInicial){
             super(x, y, TAMANHO_BLOCO, new Color(181, 52, 113), 1, 4, dirInicial, true);
         }
 
+        /**
+         * Atualiza o dano causado ao morcerango
+         * 
+         * @param damage O dano causado
+         * @return {@code true} Se o morcerango estiver acordado. Caso contrário {@code false}
+         */
         public boolean takeDamage(int damage){
             if(!isSleeping){
                 this.hp -= damage;
@@ -992,6 +1226,14 @@ public class TelaJogo extends TelaBase {
             return false;
         }
 
+        /**
+         * Gerencia o comportamento do morcerango
+         * <p>
+         * Atualiza a quantidade inicial de inimigos caso ela já não tenha sido definida.
+         * Acorda o morcerango caso a quantidade atual de inimigos seja menor que a inicial.
+         * Também faz com que o morcerango começe a se mover caso esteja acordado.
+         * </p>
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -1067,14 +1309,34 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /** 
+     * Classe para o Queijo Boxer, um inimigo com um braço extensível que usa para socar o jogador.
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class QueijoBoxer extends Inimigo {
+        /** Indicam se o queijo boxer já atacou/ está em alerta */
         private boolean hasAttacked = false, triggered = false;
+        /** Tempo de alerta */
         private long triggerTimer = 0;
+        /** A partícula de alerta que aparece caso o queijo boxer perceba o jogador */
         private Alert alerta;
+        /** O campo de visão do queijo boxer */
         private CampoDeVisao campoDeVisao;
+        /** O alcance do campo de visão/braço do queijo boxer */
         private int alcanceDeVisao;
+        /** O braço extensível do queijo boxer */
         private Projetil braco;
         
+        /**
+         * Construtor da classe Queijo Boxer
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param dir Direçao
+         * @param sightRange Alcançe
+         */
         public QueijoBoxer(int x, int y, Direction dir, int sightRange){
             super(x, y, TAMANHO_BLOCO, Color.YELLOW, 1, 0, dir, false);
             this.alcanceDeVisao = sightRange;
@@ -1098,6 +1360,12 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /**
+         * Atualiza o dano causado ao queijo boxer, e remove o braço e alerta caso seja derrotado
+         * 
+         * @param damage O dano causado
+         * @return O retorno é sempre {@code true} nesse caso
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp <= 0){
@@ -1116,6 +1384,9 @@ public class TelaJogo extends TelaBase {
             return true;
         }
 
+        /**
+         * Faz com que o queijo boxer ataque o jogador caso ele colida com seu campo de visão. Também gerencia o braço
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -1171,13 +1442,33 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /** 
+     * Classe para o Chocochato, um inimigo resistente que não ataca o jogador, mas proteje outros inimigos atrás dele
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class Chocochato extends Inimigo {
+        /** Duração de sua "animação" de dano */
         private long dmgTimer;
+
+        /**
+         * Construtor da classe Chocochato
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         */
         public Chocochato(int x, int y){
             super(x, y, TAMANHO_BLOCO, new Color(87, 43, 18), 3, 0, Direction.UP, false);
             this.curImage = chocochatoImgs[0];
         }
 
+        /**
+         * Atualiza o dano causado ao chocochato.
+         * 
+         * @param damage O dano causado
+         * @return O retorno é sempre {@code true} nesse caso
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp <= 0){
@@ -1192,6 +1483,9 @@ public class TelaJogo extends TelaBase {
             return true;
         }
 
+        /**
+         * Impede o jogador de passar por ele e gerencia a "animação" de dano
+         */
         public void atacar(){
             if(System.currentTimeMillis() - dmgTimer >= 1000) curImage = chocochatoImgs[0];
             if (colideCom(batata)) {
@@ -1206,21 +1500,48 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /** 
+     * Classe para o Algodog Doce, um inimigo que rola na direção do jogador e espalha algodão pelo caminho
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class AlgodogDoce extends Inimigo {
+        /** Indicam se o algodog está rolando/ em alerta */
         private boolean isRolling = false, triggered = false;
+        /** Tempo de alerta */
         private long triggerTimer = 0;
+        /** A partícula de alerta que aparece caso o algodog perceba o jogador */
         private Alert alerta;
+        /** Uma variável de direção auxiliar */
         private Direction curDirection;
+        /** O campo de visão do algodog */
         private CampoDeVisao campoDeVisao;
+        /** O alcance do campo de visão do algodog */
         private int alcanceDeVisao;
+        /** Uma lista para gerenciar os algodões deixados pelo algodog ao rolar*/
         private ArrayList<Projetil> algodoes = new ArrayList<>();
         
+        /**
+         * Construtor da classe AlgodogDoce
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param dirInicial Direção inicial
+         * @param sightRange Alcançe de visão
+         */
         public AlgodogDoce(int x, int y, Direction dirInicial, int sightRange){
             super(x, y, TAMANHO_BLOCO, Color.PINK, 1, 3, dirInicial, false);
             this.alcanceDeVisao = sightRange;
             changeSight();
         }
 
+        /**
+         * Atualiza o dano causado ao algodog, e remove os algodões e alerta caso seja derrotado
+         * 
+         * @param damage O dano causado
+         * @return O retorno é sempre {@code true} nesse caso
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp <= 0){
@@ -1242,6 +1563,9 @@ public class TelaJogo extends TelaBase {
             return true;
         }
 
+        /**
+         * Cria o campo de visão do algodog doce, ou o altera caso ele tenha trocado de direção
+         */
         public void changeSight(){
             if(campoDeVisao != null) campoDeVisao = null;
             switch(this.ultimaDirecao){
@@ -1264,6 +1588,16 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /**
+         * Gerencia o comportamento do Algodog
+         * 
+         * <p>
+         * Caso o jogador entre no campo de visão do algodog enquanto ele estiver parado, ele começa a rolar
+         * até ele colidir com a borda da tela ou colidir com uma parede (usando a variável auxiliar de direção, já
+         * que ele troca de direção em ambos os casos), gerando algodão de forma semi-aleatória enquanto rola.
+         * Também gerencia os algodões.
+         * </p>
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -1365,19 +1699,50 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /** 
+         * Classe para a construção dos algodões gerados pelo Algodog
+         * 
+         * @author Arthur dos Santos Rezende
+         * @version 1.0
+         */
         public class AlgodaoFactory {
+            /**
+             * Cria um novo algodão
+             * 
+             * @param x Posição x
+             * @param y Posição y
+             * @return O algodão criado
+             */
             public static Projetil createProjectile(int x, int y) {
                 return new Projetil(x, y, TAMANHO_BLOCO, TAMANHO_BLOCO, 0, 0, Color.PINK, true);
             }
         }
     }
 
+    /**
+     * Classe para o Slimebot, um inimigo que cria um raio laser em uma determinada direção
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class SlimeBot extends Inimigo {
+        /** Indica se o slimebot está atacando */
         private boolean isAttacking = false;
+        /** Timer que gerencia a duração de seu laser */
         private long timer = 0;
+        /** O alcance do laser do slimebot */
         private int alcanceDeLaser;
+        /** O laser do slimebot */
         private Projetil laser;
         
+        /**
+         * Construtor da classe Slimebot
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param dir Direção
+         * @param laserRange Alcançe do laser
+         */
         public SlimeBot(int x, int y, Direction dir, int laserRange){
             super(x, y, TAMANHO_BLOCO, Color.DARK_GRAY, 1, 0, dir, false);
             this.alcanceDeLaser = laserRange;
@@ -1390,6 +1755,12 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /**
+         * Atualiza o dano causado ao slimebot, e remove o laser caso seja derrotado
+         * 
+         * @param damage O dano causado
+         * @return O retorno é sempre {@code true} nesse caso
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp <= 0){
@@ -1404,6 +1775,9 @@ public class TelaJogo extends TelaBase {
             return true;
         }
 
+        /**
+         * Faz com que o slimebot crie um laser a cada 1,5 segundo. O laser em si dura 1s e também é gerenciado nesse método
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -1458,12 +1832,30 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Classe para o Gigabot, um "mini boss" que basicamente é um slimebot maior e mais resistente
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class GigaBot extends Inimigo {
+        /** Indica se o gigabot está atacando */
         private boolean isAttacking = false;
+        /** Timer que gerencia a duração de seu laser */
         private long timer = 0;
+        /** O alcance do laser do gigabot */
         private int alcanceDeLaser;
+        /** O laser do gigabot */
         private Projetil laser;
         
+        /**
+         * Construtor da classe Gigabot
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param dir Direção
+         * @param laserRange Alcançe do laser
+         */
         public GigaBot(int x, int y, Direction dir, int laserRange){
             super(x, y, TAMANHO_BLOCO*2, Color.DARK_GRAY, 3, 0, dir, false);
             this.alcanceDeLaser = laserRange;
@@ -1476,6 +1868,12 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /**
+         * Atualiza o dano causado ao gigabot, e remove o laser caso seja derrotado
+         * 
+         * @param damage O dano causado
+         * @return O retorno é sempre {@code true} nesse caso
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if(hp <= 0){
@@ -1490,6 +1888,9 @@ public class TelaJogo extends TelaBase {
             return true;
         }
 
+        /**
+         * Faz com que o gigabot crie um laser a cada 1,5 segundo. O laser em si dura 1s e também é gerenciado nesse método
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -1544,11 +1945,26 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Classe para o Malandranha, um inimigo que pode escalar paredes e persegue o jogador constantemente
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class Malandranha extends Inimigo{
+        /**
+         * Construtor da classe Malandranha
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         */
         public Malandranha(int x, int y){
             super(x, y, TAMANHO_BLOCO, Color.BLACK, 1, 4, Direction.DOWN, true);
         }
 
+        /**
+         * Faz com que o Malandranha se mova na direção do jogador. Nesse caso o {@code ultimaDirecao} não é usado para a movimentação.
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -1567,18 +1983,48 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Classe para o Alho, um "mini boss" que se divide em dois ao ser atingido
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     private class Alho extends Inimigo{
+        /**
+         * Representa os diferentes estágios do alho
+         */
         private enum Estagio {
-            ALHO, DENTALHO, DESCASCALHO
+            /** Estágio inicial ({@code hp} = 3) */
+            ALHO,
+            /** Estágio alcançado após a divisão ({@code hp} = 2) */
+            DENTALHO,
+            /** Estágio após a casca ser perdida ({@code hp} = 1) */
+            DESCASCALHO
         }
+        /** O estágio atual do alho */
         private Estagio estagio;
+        /** Variável auxiliar para o gerenciamento de imagens*/
         private int imgSet;
         
+        /**
+         * Construtor da classe Alho
+         * 
+         * @param x Posição x
+         * @param y Posição y
+         * @param dir Direção
+         * @param hp Pontos de vida (será 2 especificamente na hora da divisão. O padrão é 3)
+         */
         public Alho(int x, int y, Direction dir, int hp) {
             super(x, y, TAMANHO_BLOCO, Color.WHITE, hp, 0, dir, false);
             atualizarEstagio();
         }
 
+        /**
+         * Atualiza o dano causado ao alho, e cria um dentalho caso leve dano na fase de {@code ALHO}
+         * 
+         * @param damage O dano causado
+         * @return O retorno é sempre {@code true} nesse caso
+         */
         public boolean takeDamage(int damage){
             this.hp -= damage;
             if (estagio == Estagio.ALHO && hp < 3){
@@ -1609,6 +2055,9 @@ public class TelaJogo extends TelaBase {
             return true;
         }
 
+        /**
+         * Atualiza o estágio do alho baseado no seu hp atual
+         */
         private void atualizarEstagio() {
             if (hp == 3){
                 estagio = Estagio.ALHO;
@@ -1625,6 +2074,15 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /**
+         * Gerencia o comportamento do alho (nesse caso a movimentação).
+         * 
+         * <p>
+         * Em seus estágios {@code DENTALHO} e {@code DESCASCALHO}, o alho se move de maneira mais errática que outros
+         * inimigos, mudando de direção aleatoriamente após colidir com uma parede ou a borda da tela. Ele não se
+         * move no seu estágio {@code ALHO}
+         * </p>
+         */
         public void atacar(){
             if(colideCom(batata) && !batata.isInvulnerable()){
                 efeito.playSong("assets/Ouch.wav", false);
@@ -1673,6 +2131,11 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Gerencia a colisão entre paredes e outros objetos colidíveis
+     * 
+     * @param entity A entidade colidindo com a parede
+     */
     private void verificarColisaoParede(ObjetoColidivel entity) { 
         if(entity.layer == ObjetoColidivel.CollisionLayer.PLAYER){
             Player jogador = (Player) entity;
@@ -1738,16 +2201,30 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Classe para o leitor te teclas responsável por controlar o jogador
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     public class GameKeyAdapter extends KeyAdapter {
+        /** Set guardando as teclas de movimento (teclas direcionais) ativas */
         private final Set<Integer> activeMovementKeys = new HashSet<>();
+        /** Set guardando as teclas de tiro (teclas A,W,S e D) ativas */
         private final Set<Integer> activeShootingKeys = new HashSet<>();
+        /** Última direção de movimento do jogador */
         private Direction ultimaDirecaoMovimento = Direction.RIGHT;
+        /** Última direção de tiro do jogador */
         private Direction ultimaDirecaoTiro = null;
+        /** Guarda a última vez que o jogador atirou */
         private long ultimoTiro = 0;
+        /** Timer para processar ações do jogador de forma contínua (~60 FPS)*/
         private Timer continuousActionTimer;
 
+        /**
+         * Construtor da classe GameKeyAdapter
+         */
         public GameKeyAdapter() {
-            // Timer para processar ações de forma contínua (~60 FPS)
             continuousActionTimer = new Timer(16, e -> {
                 processMovement();
                 processShooting();
@@ -1756,6 +2233,11 @@ public class TelaJogo extends TelaBase {
             continuousActionTimer.start();
         }
 
+        /**
+         * Chamado quando alguma tecla é pressionada.
+         * 
+         * @param e O evento a ser processado
+         */
         @Override
         public void keyPressed(KeyEvent e) {
             int code = e.getKeyCode();
@@ -1771,6 +2253,11 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /**
+         * Chamado quando alguma tecla é solta.
+         * 
+         * @param e O evento a ser processado
+         */
         @Override
         public void keyReleased(KeyEvent e) {
             int code = e.getKeyCode();
@@ -1786,16 +2273,31 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /**
+         * Verifica se a tecla apertada é uma tecla direcional
+         * 
+         * @param code o código da tela apertada
+         * @return {@code true} caso seja uma tecla direcional. Caso contrário, {@code false}
+         */
         private boolean isMovementKey(int code) {
             return code == KeyEvent.VK_LEFT || code == KeyEvent.VK_RIGHT || 
                 code == KeyEvent.VK_UP || code == KeyEvent.VK_DOWN;
         }
 
+        /**
+         * Verifica se a tecla apertada é A,W,S ou D
+         * 
+         * @param code o código da tela apertada
+         * @return {@code true} caso seja A,W,S ou D. Caso contrário, {@code false}
+         */
         private boolean isShootingKey(int code) {
             return code == KeyEvent.VK_A || code == KeyEvent.VK_D || 
                 code == KeyEvent.VK_W || code == KeyEvent.VK_S;
         }
 
+        /**
+         * Processa o movimento do jogador
+         */
         private void processMovement() {
             if (activeMovementKeys.isEmpty()) {
                 return;
@@ -1839,6 +2341,9 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /**
+         * Processa os tiros do jogador
+         */
         private void processShooting() {
             if (activeShootingKeys.isEmpty()) return;
             
@@ -1884,6 +2389,9 @@ public class TelaJogo extends TelaBase {
             }
         }
 
+        /**
+         * Atualiza a imagem atual do jogador baseado no que ele está fazendo no moemento
+         */
         private void updateAnimation() {
             boolean isAtirando = (System.currentTimeMillis() - ultimoTiro) < 200 && ultimaDirecaoTiro != null;
             boolean isMoving = !activeMovementKeys.isEmpty();
@@ -1908,7 +2416,7 @@ public class TelaJogo extends TelaBase {
             }
         }
         
-        // Método para parar o timer quando necessário
+        /** Para o timer de ação contínua*/
         public void dispose() {
             if (continuousActionTimer != null) {
                 continuousActionTimer.stop();
@@ -1916,11 +2424,23 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Classe de gerenciamento das dungeons
+     * 
+     * @author Arthur dos Santos Rezende
+     * @version 1.0
+     */
     public class DungeonManager {
+        /** Lista dos layouts de todas as dungeons */
         private ArrayList<DungeonLayout> dungeons;
+        /** A dungeon atual */
         private int currentDungeon;
+        /** A quantidade de dungeons (25, excluindo as dungeons de boss) */
         private int dungeonAmount;
         
+        /**
+         * Construtor da classe DungeonManager
+         */
         public DungeonManager() {
             dungeons = new ArrayList<>();
             dungeonAmount = 25;
@@ -1931,10 +2451,18 @@ public class TelaJogo extends TelaBase {
             currentDungeon = (save - 1)*5;
         }
         
+        /**
+         * Retorna a dungeon atual
+         * 
+         * @return a dungeon atual
+         */
         public DungeonLayout getCurrentDungeon() {
             return dungeons.get(currentDungeon);
         }
         
+        /**
+         * Carrega a próxima dungeon
+         */
         public void nextDungeon() {
             if((currentDungeon + 1) % 5 == 0){
                 loadBoss(save);
@@ -1942,13 +2470,28 @@ public class TelaJogo extends TelaBase {
             currentDungeon++;
         }
 
-        
+        /**
+         * Classe para os layouts de dungeon
+         * 
+         * @author Arthur dos Santos Rezende
+         * @version 1.0
+         */
         public class DungeonLayout {
+            /** O número da dungeon atual */
             int lay;
+
+            /**
+             * Construtor da classe DungeonLayout
+             * 
+             * @param lay O número da dungeon a ser carregada
+             */
             public DungeonLayout(int lay){
                 this.lay = lay;
             }
             
+            /**
+             * Adciona as paredes da dungeon
+             */
             void getParedes(){
                 paredes.add(new Parede(0, 0, LARGURA_TELA, TAMANHO_BLOCO));
                 paredes.add(new Parede(0, ALTURA_TELA - TAMANHO_BLOCO, LARGURA_TELA, TAMANHO_BLOCO));
@@ -2134,6 +2677,10 @@ public class TelaJogo extends TelaBase {
                 }
                 for (Parede paredes : paredes) objetosColidiveis.add(paredes);
             }
+
+            /**
+             * Adiciona os inimigos da dungeon
+             */
             void getInimigos(){
                 switch(lay){
                     case 0:
@@ -2373,6 +2920,9 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Carrega a próxima dungeon
+     */
     private void carregarProximaDungeon() {
         dungeonManager.nextDungeon();
         if(dungeonManager.currentDungeon < dungeonManager.dungeonAmount){
@@ -2397,6 +2947,11 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Carrega a tela de batalha contra um boss.
+     * 
+     * @param bossNum Número identificador do boss
+     */
     public void loadBoss(int bossNum){
         musica.stopSong();
         efeito.stopSong();
@@ -2416,6 +2971,9 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Realiza limpeza de recursos antes da tela ser descartada.
+     */
     public void cleanUp() {
         // Parar sistemas
         estado = EstadoJogo.PARADO;
@@ -2450,6 +3008,11 @@ public class TelaJogo extends TelaBase {
         System.gc();
     }
 
+    /**
+     * Limpa um array de imagem
+     * 
+     * @param imgs o array a ser limpo
+     */
     private void cleanImgArray(Image[] imgs){
         if (imgs != null) {
             for (int i = 0; i < imgs.length; i++) imgs[i] = null;
@@ -2457,17 +3020,25 @@ public class TelaJogo extends TelaBase {
         }
     }
 
+    /**
+     * Limpa o leitor de teclas
+     */
     private void cleanKeyListeners() {
         for (KeyListener kl : getKeyListeners()) {
             removeKeyListener(kl);
         }
     }
 
+    /**
+     * Garante que todas as teclas são liberadas
+     */
     private void resetKeyState() {
-        // Garante que todas as teclas são liberadas
         KeyboardFocusManager.getCurrentKeyboardFocusManager().clearGlobalFocusOwner();
     }
 
+    /**
+     * Método de limpeza parcial, usado individualmente para a transição entre dungeons
+     */
     private void softClean() {
         inimigos.clear();
         paredes.clear();
