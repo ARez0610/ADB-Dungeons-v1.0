@@ -2,7 +2,10 @@
  * Javadoc style sheet
  */
 
-@import url('resources/fonts/dejavu.css');
+/* @import url('resources/fonts/dejavu.css'); */
+body {
+  font-family: sans-serif;
+}
 
 /*
  * These CSS custom properties (variables) define the core color and font
